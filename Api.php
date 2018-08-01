@@ -1,4 +1,8 @@
 <?php
+header_remove(); 
+header("Content-type: application/json");
+header("Content-type: charset=UTF-8");
+
 defined ( 'BASEPATH' ) or exit ( 'No direct script access allowed' );
 
 include_once (dirname(__FILE__) . "/Report_others.php");
@@ -9,15 +13,12 @@ include_once (dirname(__FILE__) . "/Report_others_m8_m13.php");
 include_once (dirname(__FILE__) . "/Report.php");
 include_once (dirname(__FILE__) . "/APP_Report.php");
 
-header("Content-type: application/json");
-header("Content-type: charset=UTF-8");
-
 class Api {
      
 	public $Report_others, $Report_others_f_k, $Report_others_m1_m7, $Report_others_m8_m13, $Report, $Dashboard, $APP_Report;
 	
 	public function __construct() {
-		header_remove(); 
+		
 		$this->Report_others = new Report_others('Yes');
 		$this->Report_others_f_k = new Report_others_f_k('No', clone $this->Report_others);
 		$this->Report_others_m1_m7 = new Report_others_m1_m7('No', clone $this->Report_others);
@@ -148,7 +149,8 @@ class Api {
 					$data = $userquery->row();
 					$result['result'] = array(
 											'token_id' => $this->encode_str($data->loginName.'___'.$data->userID),
-											'role_id'  => $this->encode_str($data->userID.'___'.$data->userRoleID),
+											//'role_id'  => $this->encode_str($data->userID.'___'.$data->userRoleID),
+											'role_id'  => $data->userRoleID,
 											'user_name' => $data->loginName,
 											'user_email' => $data->email,
 											'first_name' => $data->firstName,
@@ -196,7 +198,7 @@ class Api {
 					$token 	  = $data['token_id'];
 				}
 				
-				$this->loginData($type,$token);
+				$this->reportListData($type,$token);
 			break;
 			
 			default:
@@ -217,7 +219,8 @@ class Api {
 	
 	private function reportListData($type1,$token){
 		$checkToken = $this->check_token($token);
-		$type = $this->explode_last($this->decode_str($type1));
+		//$type = $this->explode_last($this->decode_str($type1));
+		$type = $type1;
 		
 		$reportList = $this->list_of_report();
 		$result = array();
@@ -575,7 +578,6 @@ class Api {
 		$agency 	  = isset($_GET['agency']) ? $_GET['agency'] : '45';
 		$agencyID 	  = $this->explode_last($this->decode_str($agency));
 		
-		
 		$token 	  = isset($_GET['token_id']) ? $_GET['token_id'] : '0';
 		$token_id = $this->explode_last($this->decode_str($token));
 		$text = explode('___', $this->decode_str($token));
@@ -604,7 +606,12 @@ class Api {
 			$projectID = 1;
 		}
 		if($checkToken == true){
-			$result = $this->Dashboard->summary_report('api', $projectID, $agencyID);
+			if($roleID == 3){
+				$result = $this->Dashboard->summary_report('api', $projectID, $agencyID);
+			}else{
+				$type1 	  = isset($_GET['type']) ? $_GET['type'] : 'cal';
+				$result = $this->Dashboard->portfolio_summary_report($type1, 'api', $projectID, $agencyID, $roleID);
+			}
 			return $result;
 		}else{
 			$result['result'] = 'Sorry invalid token id';
