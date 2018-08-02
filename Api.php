@@ -28,7 +28,8 @@ class Api {
 	*
 	====================================================*/
 	public function headers(){
-        header('Cache-Control: no-cache, must-revalidate');
+        header_remove();
+	header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // JSONs are by default dynamic data
         header('Content-type: application/json');
     }
