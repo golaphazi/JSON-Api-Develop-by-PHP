@@ -1,8 +1,4 @@
 <?php
-header_remove(); 
-header("Content-type: application/json");
-header("Content-type: charset=UTF-8");
-
 defined ( 'BASEPATH' ) or exit ( 'No direct script access allowed' );
 
 include_once (dirname(__FILE__) . "/Report_others.php");
@@ -18,7 +14,6 @@ class Api {
 	public $Report_others, $Report_others_f_k, $Report_others_m1_m7, $Report_others_m8_m13, $Report, $Dashboard, $APP_Report;
 	
 	public function __construct() {
-		
 		$this->Report_others = new Report_others('Yes');
 		$this->Report_others_f_k = new Report_others_f_k('No', clone $this->Report_others);
 		$this->Report_others_m1_m7 = new Report_others_m1_m7('No', clone $this->Report_others);
@@ -26,22 +21,27 @@ class Api {
 		$this->Report = new Report('No', clone $this->Report_others);
 		$this->Dashboard = new Dashboard('No', clone $this->Report_others);
 		$this->APP_Report = new APP_Report('No', clone $this->Report_others);
-		//ob_clean();
+		
 	 }
 	/*==================================================
 	* Login api code
 	*
 	====================================================*/
-	
+	public function headers(){
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // JSONs are by default dynamic data
+        header('Content-type: application/json');
+    }
+    
 	public function login(){
-		//echo '{"result":"Get receive"}'; 
+		$this->headers();
 		$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'POST';
 		
 		switch($method){
 			case 'GET':
 				$user 	  = isset($_GET['user']) ? $_GET['user'] : '';
 				$password = isset($_GET['password']) ? $_GET['password'] : '';
-				$this->loginData($user,$password);
+				echo $this->loginData($user,$password);
 			break;
 			
 			case 'POST':
@@ -55,7 +55,7 @@ class Api {
 					$password 	  = $data['password'];
 				}
 				
-				$this->loginData($user,$password);
+				echo $this->loginData($user,$password);
 			break;
 			
 			/*case 'PUT':
@@ -96,7 +96,7 @@ class Api {
 					$password 	  = $data['password'];
 				}
 				
-				$this->loginData($user,$password);
+				echo $this->loginData($user,$password);
 			break;
 			
 		}
@@ -139,7 +139,7 @@ class Api {
 	}
 	
 	private function loginData($user,$password){
-		
+		$this->headers();
 		if(strlen(trim($user)) > 0){
 			if(strlen(trim($password)) > 0){
 				
@@ -178,6 +178,7 @@ class Api {
 	====================================================*/
 	
 	public function report_list(){
+		$this->headers();
 		$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'POST';
 		
 		switch($method){
@@ -218,6 +219,7 @@ class Api {
 	}
 	
 	private function reportListData($type1,$token){
+		$this->headers();
 		$checkToken = $this->check_token($token);
 		//$type = $this->explode_last($this->decode_str($type1));
 		$type = $type1;
@@ -466,6 +468,7 @@ class Api {
 	}
 
 	public function report_view(){
+		$this->headers();
 		$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'POST';
 		
 		switch($method){
@@ -473,10 +476,7 @@ class Api {
 				$report 	  = isset($_GET['report']) ? $_GET['report'] : '';
 				$step 	  = isset($_GET['step']) ? $_GET['step'] : '';
 				$token 	  = isset($_GET['token_id']) ? $_GET['token_id'] : '0';
-				//$projectID 	  = isset($_GET['project']) ? $_GET['project'] : '0';
-				//$agencyID 	  = isset($_GET['agency']) ? $_GET['agency'] : '0';
-				//$this->report_result_Data($report,$step,$token,$projectID,$agencyID );
-				$this->report_result_Data($report,$step,$token);
+				echo $this->report_result_Data($report,$step,$token);
 			break;
 			
 			case 'POST':
@@ -492,15 +492,7 @@ class Api {
 				if(array_key_exists('token_id', $data)){
 					$token 	  = $data['token_id'];
 				}
-				/*if(array_key_exists('agency', $data)){
-					$agencyID 	  = $data['agency'];
-				}
-				if(array_key_exists('project', $data)){
-					$projectID 	  = $data['project'];
-				}
-				*/
-				//$this->report_result_Data($report,$step,$token,$projectID,$agencyID);
-				$this->report_result_Data($report,$step,$token);
+				echo $this->report_result_Data($report,$step,$token);
 			break;
 			
 			default:
@@ -516,21 +508,14 @@ class Api {
 				if(array_key_exists('token_id', $data)){
 					$token 	  = $data['token_id'];
 				}
-				/*
-				if(array_key_exists('agency', $data)){
-					$agencyID 	  = $data['agency'];
-				}
-				if(array_key_exists('project', $data)){
-					$projectID 	  = $data['project'];
-				}*/
-				//$this->report_result_Data($report,$step,$token,$projectID,$agencyID);
-				$this->report_result_Data($report,$step,$token);
+				echo $this->report_result_Data($report,$step,$token);
 			break;
 			
 		}
 	}
 	
 	private function report_result_Data($report,$step,$token){
+		$this->headers();
 		$checkToken = $this->check_token($token);
 		
 		$reportListPro = $this->list_of_report();
@@ -540,16 +525,10 @@ class Api {
 		$sub = array();
 		if($checkToken == true){
 			
-				/*$projectID = $this->explode_last($this->decode_str($project));
-				//$projectID = $project;
-				$agencyID = $this->explode_last($this->decode_str($agency));
-				//$agencyID = $agency; */
-				
 				if(array_key_exists($report, $reportList) ){
 					$reportArray = $reportList[$report];					
 					if(array_key_exists('url', $reportArray) ){
 						$mthod = $reportArray['url'];
-						//$result['result'] = $this->$mthod($step,$projectID,$agencyID);
 						$result['result'] = $this->$mthod($step);
                         echo json_encode($result); 
 					}
@@ -557,7 +536,6 @@ class Api {
 					$reportArray = $reportListPro[$report];					
 					if(array_key_exists('url', $reportArray) ){
 						$mthod = $reportArray['url'];
-						//$result['result'] = $this->$mthod($step,$projectID,$agencyID);
 						$result['result'] = $this->$mthod($step);
                         echo json_encode($result); 
 					}
@@ -614,8 +592,8 @@ class Api {
 			}
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result);
+			$result = 'Sorry invalid token id';
+			return $result;
 		}
 	}
 	
@@ -672,8 +650,8 @@ class Api {
 			
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result); 
+			$result = 'Sorry invalid token id';
+			return $result; 
 		}
 	}
 	
@@ -688,12 +666,11 @@ class Api {
 		$checkToken = $this->check_token($token);
 		
 		if($checkToken == true){
-			$result = $this->Report->pams_report_view($packageID, $packageIDLot, 'api');
-			
+			$result = $this->Report->pams_report_view($packageID, $packageIDLot, 'api');			
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result); 
+			$result = 'Sorry invalid token id';
+			return $result;
 		}
 	}
 	
@@ -752,8 +729,8 @@ class Api {
 		
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result); 
+			$result = 'Sorry invalid token id';
+			return $result; 
 		}
 	}
 	
@@ -832,8 +809,8 @@ class Api {
 			}
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result); 
+			$result = 'Sorry invalid token id';
+			return $result; 
 		}
 		
 	}
@@ -897,13 +874,14 @@ class Api {
 			$result = $this->Report->graphical_report_b_ajax($method, $from_usd, $to_usd, 'api', $projectID, $agencyID, $sectorID, $reportType); 
 			return $result;
 		}else{
-			$result['result'] = 'Sorry invalid token id';
-			echo json_encode($result); 
+			$result = 'Sorry invalid token id';
+			return $result;
 		}
 	}
 	
 	
 	public function search_package(){
+		$this->headers();
 		$project 	  = isset($_GET['project']) ? $_GET['project'] : '1';
 		$projectID 	  = $this->explode_last($this->decode_str($project));
 		
@@ -975,6 +953,7 @@ class Api {
 	}
 
 	public function search_package_lot(){
+		$this->headers();
 		$packageID 	  = isset($_GET['package']) ? $_GET['package'] : '0';
 		$token 	  = isset($_GET['token_id']) ? $_GET['token_id'] : '0';
 		$checkToken = $this->check_token($token);
